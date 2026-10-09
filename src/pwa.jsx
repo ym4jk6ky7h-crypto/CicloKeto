@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { APP_NAME } from "./brand.js";
+import { AppLogo } from "./AppLogo.jsx";
 
 function isIosDevice() {
   const ua = navigator.userAgent || "";
@@ -58,6 +59,7 @@ export function InstallHint() {
   if (ios) {
     return (
       <aside className="install-sheet">
+        <AppLogo size={48} />
         <p className="eyebrow">iPhone</p>
         <h2>Deja {APP_NAME} en tu pantalla de inicio</h2>
         {inApp ? (
@@ -101,6 +103,7 @@ export function InstallHint() {
 
   return (
     <aside className="install">
+      <AppLogo size={40} />
       <p>Instala {APP_NAME} en el móvil: se abre como app, sin tienda.</p>
       <div>
         {promptEvent && (

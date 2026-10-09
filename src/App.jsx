@@ -35,6 +35,7 @@ import { FoodArt } from "./FoodArt.jsx";
 import { WeekBoard, ShopList } from "./Kitchen.jsx";
 import { InstallHint } from "./pwa.jsx";
 import { APP_NAME, APP_TAGLINE, APP_BLURB } from "./brand.js";
+import { AppLogo } from "./AppLogo.jsx";
 
 const TABS = [
   { id: "hoy", label: "Hoy", icon: "☀️" },
@@ -122,10 +123,10 @@ export default function App() {
     <div className="app">
       <aside className="side">
         <div className="brand">
-          <span className="logo">CK</span>
+          <AppLogo size={44} />
           <div>
             <strong>{APP_NAME}</strong>
-            <small>{program === "reset" ? "Tu reset de 7 días" : "6 semanas de menús keto"}</small>
+            <small>{program === "reset" ? "Tu reset de 7 días" : "Comida keto, cada día"}</small>
           </div>
         </div>
         <nav className="side-nav">
@@ -151,6 +152,15 @@ export default function App() {
       </aside>
 
       <main className="main">
+        {state.startDate ? (
+          <header className="topbar">
+            <AppLogo size={40} />
+            <div>
+              <strong>{APP_NAME}</strong>
+              <small>{program === "reset" ? "Reset de 7 días" : "Comida keto, cada día"}</small>
+            </div>
+          </header>
+        ) : null}
         {!state.startDate ? (
           <Onboarding
             onStart={(startDate, weightKg, hydrates, nextProgram, nextReset) =>
@@ -323,11 +333,7 @@ function Onboarding({ onStart }) {
   return (
     <section className="onboard splash">
       <div className="splash-hero">
-        <div className="splash-arts" aria-hidden="true">
-          <div className="float a"><FoodArt kind="eggs" title="" /></div>
-          <div className="float b"><FoodArt kind="salad" title="" /></div>
-          <div className="float c"><FoodArt kind="fish" title="" /></div>
-        </div>
+        <AppLogo size={92} className="splash-logo" />
         <p className="eyebrow">La app de keto en casa</p>
         <h1 className="app-title">{APP_NAME}</h1>
         <p className="lead">{APP_BLURB}</p>
@@ -342,7 +348,7 @@ function Onboarding({ onStart }) {
         <button className={`card program-card visual ${program === "ciclo" ? "on" : ""}`} onClick={() => setProgram("ciclo")}>
           <FoodArt kind="bowl" title="" />
           <p className="eyebrow">6 semanas</p>
-          <h3>El ciclo keto</h3>
+          <h3>Plan de 6 semanas</h3>
           <p>Aterrizas, entras en cetosis y vuelves al día a día. Menús distintos cada tanda.</p>
         </button>
         <button className={`card program-card visual ${program === "reset" ? "on" : ""}`} onClick={() => setProgram("reset")}>
@@ -384,7 +390,7 @@ function Onboarding({ onStart }) {
           </label>
         )}
         <button className="btn primary go" onClick={() => onStart(date, kg, hydrates, program, resetId)}>
-          {program === "reset" ? "Arrancar mi reset keto" : "Arrancar mi Ciclo Keto"}
+          {program === "reset" ? "Empezar mi reset keto" : `Empezar ${APP_NAME}`}
         </button>
         <p className="hint">Se queda en este teléfono. Nadie más lo ve.</p>
       </div>
@@ -399,10 +405,9 @@ function Today({ dayNumber, totalDays, inCycle, program, phase, meta, meals, wee
   return (
     <section className="today">
       <header className="hero">
-        <p className="brand-kicker">{APP_NAME}</p>
         <p className="eyebrow">{greeting()}</p>
         {ended ? (
-          <h1>{program === "reset" ? "Reset hecho. Mira cómo te sientes." : "Ciclo cerrado. Ahora, a vivir con lo que has aprendido."}</h1>
+          <h1>{program === "reset" ? "Reset hecho. Mira cómo te sientes." : "Plan cerrado. Ahora, a vivir con lo que has aprendido."}</h1>
         ) : future ? (
           <h1>Todavía no es el día. Mientras, mira la semana y las recetas.</h1>
         ) : (

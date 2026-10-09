@@ -1,6 +1,13 @@
-const CACHE = "ciclo-v3";
+const CACHE = "menu-keto-v1";
 const BASE = new URL(".", self.location).pathname;
-const SHELL = [BASE, `${BASE}index.html`, `${BASE}favicon.svg`, `${BASE}manifest.webmanifest`];
+const SHELL = [
+  BASE,
+  `${BASE}index.html`,
+  `${BASE}favicon.svg`,
+  `${BASE}icon.svg`,
+  `${BASE}icon-192.png`,
+  `${BASE}manifest.webmanifest`,
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

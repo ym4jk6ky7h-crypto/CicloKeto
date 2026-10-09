@@ -1,6 +1,6 @@
-# Ciclo Keto
+# Menú Keto
 
-App de menús keto de 6 semanas (o un reset de 7 días): recetas paso a paso, calendario semanal y lista de la compra.
+App de comida keto para cada día: recetas paso a paso, calendario semanal y lista de la compra. También un reset de 7 días.
 
 ## Cómo abrirla
 

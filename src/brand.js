@@ -1,5 +1,9 @@
-export const APP_NAME = "Ciclo Keto";
-export const APP_SHORT = "Ciclo Keto";
-export const APP_TAGLINE = "Menús keto de 6 semanas, recetas paso a paso";
+export const APP_NAME = "Menú Keto";
+export const APP_SHORT = "Menú Keto";
+export const APP_TAGLINE = "Comida keto para cada día, recetas paso a paso";
 export const APP_BLURB =
-  "El plan para comer keto en casa: qué hay hoy, cómo se cocina aunque no sepas, y la lista del súper.";
+  "Qué hay hoy en la mesa, cómo se cocina aunque no sepas, y la lista del súper.";
+
+export function iconUrl(file = "icon.svg") {
+  return `${import.meta.env.BASE_URL}${file}`;
+}
