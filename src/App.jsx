@@ -9,18 +9,21 @@ import {
   KIND_FILTERS,
 } from "./data/catalog";
 import {
-  TOTAL_DAYS,
   weekMeta,
   getPhaseForDay,
   getWeekForDay,
   getMealsForDay,
   getWeekMeta,
   getWeekPlan,
+  getWeekMenu,
   swapMeal,
+  totalDaysFor,
 } from "./data/cycle";
+import { RESET_OPTIONS } from "./data/menus";
 import { exercises, getRoutineForDay } from "./data/workouts";
 import {
   cycleStory,
+  resetStory,
   fastingLevels,
   fastingBreaks,
   sundayFasts,
@@ -31,14 +34,15 @@ import { shoppingByWeek, snacks } from "./data/shopping";
 import { loadState, saveState, todayISO, diffDays } from "./storage";
 import { Pose } from "./Pose.jsx";
 import { FoodArt } from "./FoodArt.jsx";
+import { WeekBoard, ShopList } from "./Kitchen.jsx";
 import { InstallHint } from "./pwa.jsx";
 
 const TABS = [
   { id: "hoy", label: "Hoy", icon: "☀️" },
+  { id: "semana", label: "Semana", icon: "🗓️" },
   { id: "recetas", label: "Recetas", icon: "🥗" },
-  { id: "alimentos", label: "Alimentos", icon: "🥬" },
-  { id: "moverte", label: "Moverte", icon: "🤸" },
-  { id: "mas", label: "Guías", icon: "📖" },
+  { id: "compra", label: "Compra", icon: "🛒" },
+  { id: "mas", label: "Más", icon: "✨" },
 ];
 
 const MEAL_KEYS = [
@@ -69,18 +73,22 @@ export default function App() {
   const [guideSub, setGuideSub] = useState("ciclo");
   const [recipeId, setRecipeId] = useState(null);
   const [playing, setPlaying] = useState(false);
+  const [viewWeek, setViewWeek] = useState(null);
 
   useEffect(() => saveState(state), [state]);
 
+  const program = state.program || "ciclo";
+  const resetId = state.resetId || "reset1";
+  const totalDays = totalDaysFor(program);
   const today = todayISO();
   const dayNumber = state.startDate ? diffDays(state.startDate, today) + 1 : 0;
-  const inCycle = dayNumber >= 1 && dayNumber <= TOTAL_DAYS;
-  const cycleDay = inCycle ? dayNumber : dayNumber > TOTAL_DAYS ? TOTAL_DAYS : 1;
-  const week = getWeekForDay(cycleDay);
-  const phaseId = getPhaseForDay(cycleDay);
+  const inCycle = dayNumber >= 1 && dayNumber <= totalDays;
+  const cycleDay = inCycle ? dayNumber : dayNumber > totalDays ? totalDays : 1;
+  const week = getWeekForDay(cycleDay, program);
+  const phaseId = getPhaseForDay(cycleDay, program, resetId);
   const phase = phases[phaseId];
-  const meta = getWeekMeta(week);
-  const baseMeals = getMealsForDay(cycleDay, state.cycleIndex || 0);
+  const meta = getWeekMeta(week, program, resetId);
+  const baseMeals = getMealsForDay(cycleDay, state.cycleIndex || 0, program, resetId);
   const daySwaps = (state.swaps && state.swaps[today]) || {};
   const meals = {
     ...baseMeals,
@@ -88,9 +96,12 @@ export default function App() {
     lunch: daySwaps.lunch || baseMeals.lunch,
     dinner: daySwaps.dinner || baseMeals.dinner,
   };
-  const weekPlan = getWeekPlan(cycleDay, state.cycleIndex || 0);
+  const weekPlan = getWeekPlan(cycleDay, state.cycleIndex || 0, program, resetId);
+  const weekMenu = getWeekMenu(viewWeek || week, state.cycleIndex || 0, program, resetId);
   const routine = getRoutineForDay(cycleDay);
   const check = state.checkins[today] || { water: 0 };
+  const shop = shoppingByWeek[weekPlan?.id];
+  const shopChecks = (state.shopChecks && state.shopChecks[weekPlan?.id]) || {};
 
   function patch(partial) {
     setState((s) => ({ ...s, ...partial }));
@@ -115,13 +126,13 @@ export default function App() {
           <span className="logo">C</span>
           <div>
             <strong>Ciclo</strong>
-            <small>6 semanas keto</small>
+            <small>{program === "reset" ? "Reset de 7 días" : "6 semanas keto"}</small>
           </div>
         </div>
         <nav className="side-nav">
           {TABS.map((t) => (
             <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => {
-                if (t.id !== "moverte") setPlaying(false);
+                setPlaying(false);
                 setTab(t.id);
               }}>
               <span>{t.icon}</span>
@@ -131,9 +142,9 @@ export default function App() {
         </nav>
         {state.startDate && (
           <div className="side-progress">
-            <p>Día {Math.min(Math.max(dayNumber, 1), TOTAL_DAYS)} de {TOTAL_DAYS}</p>
+            <p>Día {Math.min(Math.max(dayNumber, 1), totalDays)} de {totalDays}</p>
             <div className="bar">
-              <i style={{ width: `${Math.min(100, Math.max(0, (dayNumber / TOTAL_DAYS) * 100))}%` }} />
+              <i style={{ width: `${Math.min(100, Math.max(0, (dayNumber / totalDays) * 100))}%` }} />
             </div>
             <small>{meta.title}</small>
           </div>
@@ -143,8 +154,16 @@ export default function App() {
       <main className="main">
         {!state.startDate ? (
           <Onboarding
-            onStart={(startDate, weightKg, hydrates) =>
-              patch({ startDate, weightKg, hydrates, cycleIndex: state.cycleIndex || 0 })
+            onStart={(startDate, weightKg, hydrates, nextProgram, nextReset) =>
+              patch({
+                startDate,
+                weightKg,
+                hydrates,
+                program: nextProgram,
+                resetId: nextReset,
+                cycleIndex: nextProgram === "ciclo" ? state.cycleIndex || 0 : state.cycleIndex || 0,
+                shopChecks: {},
+              })
             }
           />
         ) : (
@@ -152,16 +171,22 @@ export default function App() {
             {tab === "hoy" && (
               <Today
                 dayNumber={dayNumber}
+                totalDays={totalDays}
                 inCycle={inCycle}
+                program={program}
                 phase={phase}
                 meta={meta}
                 meals={meals}
-                weekPlan={weekPlan}
+                weekMenu={getWeekMenu(week, state.cycleIndex || 0, program, resetId)}
                 hydrates={state.hydrates}
                 routine={routine}
                 check={check}
                 onCheck={patchCheck}
                 onOpenRecipe={setRecipeId}
+                onOpenWeek={() => {
+                  setViewWeek(week);
+                  setTab("semana");
+                }}
                 onSwap={(key) => {
                   const next = swapMeal(meals[key], key, phaseId);
                   setState((s) => ({
@@ -173,45 +198,79 @@ export default function App() {
                   }));
                 }}
                 onPlay={() => {
-                  setTab("moverte");
+                  setGuideSub("moverte");
+                  setTab("mas");
                   setPlaying(true);
                 }}
                 onReset={() => patch({ startDate: null })}
-                onOpenGuides={() => {
-                  setGuideSub("compra");
-                  setTab("mas");
-                }}
+                onOpenShop={() => setTab("compra")}
+              />
+            )}
+            {tab === "semana" && (
+              <WeekBoard
+                program={program}
+                weekNumber={viewWeek || week}
+                weekCount={program === "reset" ? 1 : 6}
+                weekMenu={weekMenu}
+                meta={getWeekMeta(viewWeek || week, program, resetId)}
+                todayNumber={cycleDay}
+                hydrates={state.hydrates}
+                onWeek={(n) => setViewWeek(n)}
+                onOpenRecipe={setRecipeId}
+                onGoToday={() => setTab("hoy")}
               />
             )}
             {tab === "recetas" && <Recipes phaseId={phaseId} onOpen={setRecipeId} />}
-            {tab === "alimentos" && <Foods />}
-            {tab === "moverte" && (
-              <Move
-                routine={routine}
-                dayNumber={cycleDay}
-                playing={playing}
-                setPlaying={setPlaying}
-                done={!!check.workout}
-                onDone={() => patchCheck({ workout: true })}
+            {tab === "compra" && (
+              <ShopList
+                shop={shop}
+                checks={shopChecks}
+                onToggle={(id) => {
+                  const weekId = weekPlan?.id;
+                  if (!weekId) return;
+                  setState((s) => ({
+                    ...s,
+                    shopChecks: {
+                      ...(s.shopChecks || {}),
+                      [weekId]: { ...((s.shopChecks || {})[weekId] || {}), [id]: !((s.shopChecks || {})[weekId] || {})[id] },
+                    },
+                  }));
+                }}
               />
             )}
             {tab === "mas" && (
-              <Guides
-                state={state}
-                week={week}
-                weekPlan={weekPlan}
-                sub={guideSub}
-                onSub={setGuideSub}
-                onWeight={(weightKg) => patch({ weightKg })}
-                onRestart={() =>
-                  patch({
-                    startDate: null,
-                    checkins: {},
-                    swaps: {},
-                    cycleIndex: (state.cycleIndex || 0) + 1,
-                  })
-                }
-              />
+              <>
+                <MoreNav sub={guideSub} onSub={(id) => { if (id !== "moverte") setPlaying(false); setGuideSub(id); }} />
+                {guideSub === "alimentos" && <Foods />}
+                {guideSub === "moverte" && (
+                  <Move
+                    routine={routine}
+                    dayNumber={cycleDay}
+                    playing={playing}
+                    setPlaying={setPlaying}
+                    done={!!check.workout}
+                    onDone={() => patchCheck({ workout: true })}
+                  />
+                )}
+                {(guideSub === "ciclo" || guideSub === "ayuno" || guideSub === "proteina") && (
+                  <Guides
+                    state={state}
+                    week={week}
+                    program={program}
+                    sub={guideSub}
+                    onWeight={(weightKg) => patch({ weightKg })}
+                    onRestart={() =>
+                      patch({
+                        startDate: null,
+                        checkins: {},
+                        swaps: {},
+                        shopChecks: {},
+                        cycleIndex: program === "ciclo" ? (state.cycleIndex || 0) + 1 : state.cycleIndex || 0,
+                      })
+                    }
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -221,7 +280,7 @@ export default function App() {
         <nav className="tabbar">
           {TABS.map((t) => (
             <button key={t.id} className={tab === t.id ? "active" : ""} onClick={() => {
-                if (t.id !== "moverte") setPlaying(false);
+                setPlaying(false);
                 setTab(t.id);
               }}>
               <span>{t.icon}</span>
@@ -237,21 +296,68 @@ export default function App() {
   );
 }
 
+function MoreNav({ sub, onSub }) {
+  return (
+    <div className="chips wrap more-nav">
+      {[
+        ["ciclo", "Tu camino"],
+        ["alimentos", "¿Puedo comer…?"],
+        ["moverte", "Moverte"],
+        ["ayuno", "Ayuno"],
+        ["proteina", "Proteína"],
+      ].map(([id, label]) => (
+        <button key={id} className={`chip ${sub === id ? "sage" : "ghost"}`} onClick={() => onSub(id)}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Onboarding({ onStart }) {
   const [date, setDate] = useState(todayISO());
   const [kg, setKg] = useState(70);
   const [hydrates, setHydrates] = useState(true);
+  const [program, setProgram] = useState("ciclo");
+  const [resetId, setResetId] = useState("reset1");
+  const story = program === "reset" ? resetStory : cycleStory;
 
   return (
     <section className="onboard">
-      <p className="eyebrow">Método de 6 semanas</p>
-      <h1>Un ciclo keto amable, claro y con ganas de seguirlo.</h1>
+      <p className="eyebrow">Elige cómo quieres empezar</p>
+      <h1>Comer bien, sin convertirlo en un examen.</h1>
       <p className="lead">
-        Semana 1 para adaptar. Cuatro semanas de cetosis. La sexta, para volver al día a día sin caos.
-        Menús reales del Reset y del Ciclo 12, para no repetir plato cada vez.
+        Un ciclo de seis semanas para cambiar el combustible. O un reset de siete días, si ahora mismo solo necesitas aterrizar.
       </p>
+      <div className="program-pick">
+        <button className={`card program-card ${program === "ciclo" ? "on" : ""}`} onClick={() => setProgram("ciclo")}>
+          <p className="eyebrow">6 semanas</p>
+          <h3>El ciclo</h3>
+          <p>Aterrizas, entras en cetosis y vuelves al día a día. Menús distintos cada tanda, para no repetir plato.</p>
+        </button>
+        <button className={`card program-card ${program === "reset" ? "on" : ""}`} onClick={() => setProgram("reset")}>
+          <p className="eyebrow">7 días</p>
+          <h3>Un reset</h3>
+          <p>Una semana intensa y concreta. Cocinas el domingo y el resto es montar. Cabe en la vida real.</p>
+        </button>
+      </div>
+      {program === "reset" && (
+        <div className="program-pick">
+          {RESET_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              className={`card program-card ${resetId === opt.id ? "on" : ""}`}
+              onClick={() => setResetId(opt.id)}
+            >
+              <h3>{opt.title}</h3>
+              <p>{opt.blurb}</p>
+              <p className="muted">{opt.vibe}</p>
+            </button>
+          ))}
+        </div>
+      )}
       <div className="story-grid">
-        {cycleStory.map((s) => (
+        {story.map((s) => (
           <article key={s.title} className="card">
             <h3>{s.title}</h3>
             <p>{s.body}</p>
@@ -267,21 +373,23 @@ function Onboarding({ onStart }) {
           Peso (kg), para la proteína
           <input type="number" min="40" max="160" value={kg} onChange={(e) => setKg(Number(e.target.value))} />
         </label>
-        <label className="check-row">
-          <input type="checkbox" checked={hydrates} onChange={(e) => setHydrates(e.target.checked)} />
-          Es mi primer ciclo: muéstrame la opción hidrato en semana 1
-        </label>
-        <button className="btn primary" onClick={() => onStart(date, kg, hydrates)}>
-          Empezar mi ciclo
+        {(program === "ciclo" || resetId === "reset1") && (
+          <label className="check-row">
+            <input type="checkbox" checked={hydrates} onChange={(e) => setHydrates(e.target.checked)} />
+            Si es la primera vez, muéstrame un carbo pequeño al mediodía
+          </label>
+        )}
+        <button className="btn primary" onClick={() => onStart(date, kg, hydrates, program, resetId)}>
+          {program === "reset" ? "Empezar el reset" : "Empezar el ciclo"}
         </button>
-        <p className="hint">Se guarda en este navegador. Si ya hiciste un ciclo, al reiniciar cambiarán los menús.</p>
+        <p className="hint">Se queda en este teléfono. Nadie más lo ve.</p>
       </div>
     </section>
   );
 }
 
-function Today({ dayNumber, inCycle, phase, meta, meals, weekPlan, hydrates, routine, check, onCheck, onOpenRecipe, onSwap, onPlay, onReset, onOpenGuides }) {
-  const ended = dayNumber > TOTAL_DAYS;
+function Today({ dayNumber, totalDays, inCycle, program, phase, meta, meals, weekMenu, hydrates, routine, check, onCheck, onOpenRecipe, onOpenWeek, onSwap, onPlay, onReset, onOpenShop }) {
+  const ended = dayNumber > totalDays;
   const future = dayNumber < 1;
 
   return (
@@ -289,26 +397,33 @@ function Today({ dayNumber, inCycle, phase, meta, meals, weekPlan, hydrates, rou
       <header className="hero">
         <p className="eyebrow">{greeting()}</p>
         {ended ? (
-          <h1>Ciclo completado. Mira cómo te sientes al reintroducir.</h1>
+          <h1>{program === "reset" ? "Reset hecho. Mira cómo te sientes." : "Ciclo cerrado. Ahora, a vivir con lo que has aprendido."}</h1>
         ) : future ? (
-          <h1>Tu ciclo aún no empieza. Mientras, explora recetas y el semáforo.</h1>
+          <h1>Todavía no es el día. Mientras, mira la semana y las recetas.</h1>
         ) : (
           <h1>
-            Día {dayNumber} · Semana {meta.week}
+            Hoy es {meals.weekday}.
           </h1>
         )}
-        <div className="chips">
-          <span className={`chip ${phase.color}`}>{phase.title}</span>
-          <span className="chip ghost">Ayuno {meta.fastingDaily}</span>
-          <span className="chip ghost">Domingo {meta.fastingSunday.split(" (")[0]}</span>
-        </div>
         <p className="motto">{meta.motto}</p>
-        {weekPlan && <p className="muted">{meals.weekday} · {weekPlan.title}</p>}
+        <div className="chips">
+          <span className={`chip ${phase.color}`}>{meta.title}</span>
+          <span className="chip ghost">{program === "reset" ? `Día ${Math.min(Math.max(dayNumber, 1), totalDays)} de 7` : `Día ${Math.min(Math.max(dayNumber, 1), totalDays)}`}</span>
+        </div>
       </header>
+
+      <nav className="week-strip" aria-label="Esta semana">
+        {weekMenu.map((d) => (
+          <button key={d.dayNumber} className={d.dayNumber === dayNumber ? "on" : ""} onClick={onOpenWeek}>
+            <span>{d.short}</span>
+          </button>
+        ))}
+      </nav>
+      <button className="link week-link" onClick={onOpenWeek}>Ver la semana completa →</button>
 
       <p className="today-tip">{meta.focus}</p>
 
-      <h2 className="block-title">Qué comes hoy</h2>
+      <h2 className="block-title">Hoy en la mesa</h2>
       <div className="meals">
         {MEAL_KEYS.map((m) => {
           const item = meals[m.key];
@@ -336,8 +451,8 @@ function Today({ dayNumber, inCycle, phase, meta, meals, weekPlan, hydrates, rou
 
       {hydrates && meals.hydrate && phase.id !== "cetosis" && (
         <article className="card hydrate">
-          <p className="eyebrow">Si es tu primer ciclo</p>
-          <h3>Puedes sumar este hidrato</h3>
+          <p className="eyebrow">Si te apetece un carbo</p>
+          <h3>Hoy puedes sumar esto</h3>
           <p>{meals.hydrate}</p>
         </article>
       )}
@@ -371,7 +486,7 @@ function Today({ dayNumber, inCycle, phase, meta, meals, weekPlan, hydrates, rou
               ))}
             </ul>
           </details>
-          <button className="link" onClick={onOpenGuides}>Lista de la compra →</button>
+          <button className="link" onClick={onOpenShop}>Lista de la compra →</button>
         </article>
       </div>
 
@@ -419,8 +534,8 @@ function Recipes({ phaseId, onOpen }) {
   return (
     <section className="catalog">
       <header className="page-head">
-        <h1>Recetario</h1>
-        <p>Todos los platos, salsas y extras. Filtra y toca uno para ver por qué está, los ingredientes y cómo se hace.</p>
+            <h1>La cocina</h1>
+        <p>Toca un plato y te cuento por qué está, qué lleva y cómo se hace. Sin ficha de laboratorio.</p>
       </header>
       <input
         className="search"
@@ -676,88 +791,45 @@ function Move({ routine, dayNumber, playing, setPlaying, done, onDone }) {
   );
 }
 
-function Guides({ state, week, weekPlan, sub, onSub, onWeight, onRestart }) {
+function Guides({ state, week, program, sub, onWeight, onRestart }) {
   const protein = Math.round(state.weightKg * 1.8);
-  const shop = shoppingByWeek[weekPlan?.id];
 
   return (
     <section>
-      <header className="page-head">
-        <h1>Guías del método</h1>
-        <p>Ciclo, ayuno sin agobio y proteína. Material de apoyo, no una receta médica.</p>
-      </header>
-      <div className="chips wrap">
-        {[
-          ["ciclo", "Las 6 semanas"],
-          ["compra", "Compra"],
-          ["ayuno", "Ayuno"],
-          ["proteina", "Proteína"],
-        ].map(([id, label]) => (
-          <button key={id} className={`chip ${sub === id ? "sage" : "ghost"}`} onClick={() => onSub(id)}>
-            {label}
-          </button>
-        ))}
-      </div>
-
       {sub === "ciclo" && (
         <div className="weeks">
-          {weekMeta.map((w) => (
-            <article key={w.week} className={`card ${w.week === week ? "current" : ""}`}>
-              <p className="eyebrow">Semana {w.week}</p>
-              <h3>{w.title}</h3>
-              <p>{w.motto}</p>
-              <p className="muted">{w.focus}</p>
-              <p>
-                <strong>Ayuno diario:</strong> {w.fastingDaily}
-              </p>
-              <p>
-                <strong>Domingo:</strong> {w.fastingSunday}
-              </p>
+          <header className="page-head">
+            <h1>{program === "reset" ? "Este reset" : "Las seis semanas"}</h1>
+            <p>
+              {program === "reset"
+                ? "Siete días. Sin nombres raros. Cocina, agua, y a otra cosa."
+                : "No es un examen. Cada semana tiene un tono distinto."}
+            </p>
+          </header>
+          {(program === "reset" ? weekMeta.slice(0, 1) : weekMeta).map((w) => (
+            <article key={w.week} className={`card ${w.week === week || program === "reset" ? "current" : ""}`}>
+              {program !== "reset" && <p className="eyebrow">Semana {w.week}</p>}
+              <h3>{program === "reset" ? "Tu semana" : w.title}</h3>
+              <p>{program === "reset" ? "Come, duerme, bebe agua. El domingo, una hora de cocina y listo." : w.motto}</p>
+              {program !== "reset" && <p className="muted">{w.focus}</p>}
             </article>
           ))}
           <p className="hint">
-            Ciclo nº {(state.cycleIndex || 0) + 1}. Al reiniciar, las semanas 2–5 cambian de tanda para no repetir.
+            {program === "reset"
+              ? "Cuando termines, puedes hacer el ciclo de 6 semanas o repetir el reset con la otra tanda."
+              : "Si empiezas otro ciclo, los menús cambian para no repetir plato."}
           </p>
           <button className="btn" onClick={onRestart}>
-            Nuevo ciclo (otros menús)
+            {program === "reset" ? "Elegir otro camino" : "Empezar otro ciclo"}
           </button>
-        </div>
-      )}
-
-      {sub === "compra" && shop && (
-        <div className="guide">
-          <article className="card">
-            <h2>{shop.title}</h2>
-            <p>Para 1 persona. Compra el viernes o sábado y batch el domingo (60–90 min).</p>
-          </article>
-          {Object.entries(shop.groups).map(([name, items]) => (
-            <article key={name} className="card">
-              <h3>{name}</h3>
-              <ul>
-                {items.map((x) => (
-                  <li key={x}>{x}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-          {shop.batch && (
-            <article className="card">
-              <h3>Batch del finde</h3>
-              <ul>
-                {shop.batch.map((x) => (
-                  <li key={x}>{x}</li>
-                ))}
-              </ul>
-            </article>
-          )}
         </div>
       )}
 
       {sub === "ayuno" && (
         <div className="guide">
           <article className="card">
-            <h2>El ayuno es una herramienta, no una prueba</h2>
-            <p>Si te genera ansiedad, te quita el sueño o te tiene contando horas, ya no te está ayudando.</p>
+            <h2>El ayuno no es una prueba</h2>
+            <p>Si te quita el sueño o te tiene contando horas, ya no te está ayudando. Come.</p>
           </article>
           {fastingLevels.map((f) => (
             <article key={f.hours} className="card">
@@ -768,7 +840,7 @@ function Guides({ state, week, weekPlan, sub, onSub, onWeight, onRestart }) {
           ))}
           <article className="card">
             <h3>Domingo de este ciclo</h3>
-            <p>Propuesta del método: {sundayFasts[week]}. Elige completo, intermedio o suave (16–18 h) según sueño y regla.</p>
+            <p>{sundayFasts[week]}</p>
           </article>
           <div className="grid-3">
             <article className="card">
@@ -816,7 +888,7 @@ function Guides({ state, week, weekPlan, sub, onSub, onWeight, onRestart }) {
               <input type="number" value={state.weightKg} onChange={(e) => onWeight(Number(e.target.value))} />
             </label>
             <p className="protein-n">{protein} g</p>
-            <p>Usando 1,8 g/kg (déficit y preservar músculo). Reparte 25–40 g en cada comida.</p>
+            <p>Unos 1,8 g por kilo, para no perder músculo. Reparte entre las tres comidas, no lo dejes para la noche.</p>
           </article>
           <article className="card">
             <h3>Por 100 g de alimento</h3>

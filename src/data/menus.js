@@ -9,7 +9,7 @@ function meal(title, recipe, detail) {
 const reset1 = [
   d(
     meal("Yogur de coco con arándanos", "yogur-coco-arandanos", "Nueces, semillas, cacao. Suma huevo o proteína."),
-    meal("Pinchitos de pavo", "pinchitos-pavo", "Marinados, con ensalada de verano."),
+    meal("Pinchitos de pavo", "pinchitos-pavo", "Marinados, con ensalada de verdes."),
     meal("Crema fría de calabacín + tortilla", "crema-fria-calabacin", "Melón, pepino y hierbabuena. Haz el doble."),
     "Desayuno: 1 melocotón pequeño. Comida: puñado de arroz salvaje enfriado."
   ),
@@ -206,14 +206,29 @@ const reintro = [
 ];
 
 export const WEEK_BANK = {
-  reset1: { id: "reset1", phase: "adaptacion", title: "Reset verano · Semana 1", days: reset1 },
-  reset2: { id: "reset2", phase: "cetosis", title: "Reset verano · Semana 2", days: reset2 },
-  c12s1: { id: "c12s1", phase: "adaptacion", title: "Ciclo 12 · Semana 1", days: ciclo12s1 },
-  c12s2: { id: "c12s2", phase: "cetosis", title: "Ciclo 12 · Semana 2", days: c12s2 },
-  c12s3: { id: "c12s3", phase: "cetosis", title: "Ciclo 12 · Semana 3", days: c12s3 },
-  mix: { id: "mix", phase: "cetosis", title: "Semana 2 Reset (otra tanda)", days: mixKeto },
-  reintro: { id: "reintro", phase: "reinsercion", title: "Reinserción inteligente", days: reintro },
+  reset1: { id: "reset1", phase: "adaptacion", title: "Cocina fresca", days: reset1 },
+  reset2: { id: "reset2", phase: "cetosis", title: "Plancha y horno", days: reset2 },
+  c12s1: { id: "c12s1", phase: "adaptacion", title: "Aterrizaje mediterráneo", days: ciclo12s1 },
+  c12s2: { id: "c12s2", phase: "cetosis", title: "Cetosis con caldo", days: c12s2 },
+  c12s3: { id: "c12s3", phase: "cetosis", title: "Brasa y estofado", days: c12s3 },
+  mix: { id: "mix", phase: "cetosis", title: "Diario sin repetición", days: mixKeto },
+  reintro: { id: "reintro", phase: "reinsercion", title: "Volver al día a día", days: reintro },
 };
+
+export const RESET_OPTIONS = [
+  {
+    id: "reset1",
+    title: "Reset suave",
+    blurb: "Siete días para aterrizar. Comidas de verdad y, si quieres, un carbo pequeño al mediodía.",
+    vibe: "Cremas, pescado, huevos y verdes.",
+  },
+  {
+    id: "reset2",
+    title: "Reset keto",
+    blurb: "Siete días ya sin cereal ni fruta. La nevera ordenada y la sartén lista.",
+    vibe: "Plancha, horno y cero heroísmo.",
+  },
+];
 
 const ADAPT = ["reset1", "c12s1"];
 const KETO = ["reset2", "c12s2", "c12s3", "mix"];
@@ -233,3 +248,4 @@ export function getMenuDay(dayNumber, cycleIndex = 0) {
 }
 
 export const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+export const WEEKDAYS_SHORT = ["L", "M", "X", "J", "V", "S", "D"];

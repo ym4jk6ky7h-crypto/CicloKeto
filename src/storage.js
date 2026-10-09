@@ -5,19 +5,30 @@ const empty = {
   weightKg: 70,
   activity: 1.8,
   cycleIndex: 0,
+  program: "ciclo",
+  resetId: "reset1",
   hydrates: true,
   swaps: {},
   checkins: {},
+  shopChecks: {},
 };
 
 export function loadState() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { ...empty, checkins: {} };
+    if (!raw) return { ...empty, checkins: {}, shopChecks: {} };
     const parsed = JSON.parse(raw);
-    return { ...empty, ...parsed, checkins: parsed.checkins || {}, swaps: parsed.swaps || {} };
+    return {
+      ...empty,
+      ...parsed,
+      program: parsed.program || "ciclo",
+      resetId: parsed.resetId || "reset1",
+      checkins: parsed.checkins || {},
+      swaps: parsed.swaps || {},
+      shopChecks: parsed.shopChecks || {},
+    };
   } catch {
-    return { ...empty, checkins: {} };
+    return { ...empty, checkins: {}, shopChecks: {} };
   }
 }
 

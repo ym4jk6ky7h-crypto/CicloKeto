@@ -273,11 +273,69 @@ ul, ol { padding-left: 1.1em; }
   .side { display: none; }
   .tabbar { display: flex; }
   .main { padding: 22px 18px 110px; }
-  .grid-2, .grid-3, .meals, .story-grid, .food-cols, .today-row { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .meals, .story-grid, .food-cols, .today-row, .program-pick { grid-template-columns: 1fr; }
+  .cal-grid { grid-template-columns: 1fr 1fr; }
+  .cal-day { min-height: 0; }
   .workout-teaser { flex-direction: column; align-items: stretch; }
 }
 
+.program-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 20px 0; }
+.program-card {
+  text-align: left; cursor: pointer; width: 100%;
+  font: inherit; color: inherit;
+}
+.program-card.on { outline: 3px solid var(--sage); background: #eef6ef; }
+.week-strip {
+  display: flex; gap: 8px; margin: 16px 0 6px;
+}
+.week-strip button {
+  flex: 1; border: 0; background: #fff; border-radius: 16px;
+  padding: 10px 0; cursor: pointer; font-weight: 650;
+  box-shadow: var(--shadow);
+}
+.week-strip button.on { background: var(--sage); color: #fff9f1; }
+.week-link { margin-bottom: 18px; }
+.week-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+}
+.cal-day {
+  border: 1px solid var(--line); background: var(--paper); border-radius: 16px;
+  padding: 10px 8px 12px; text-align: left; cursor: pointer; color: inherit;
+  min-height: 160px;
+}
+.cal-day strong { display: block; font-size: 0.78rem; margin-bottom: 6px; }
+.cal-letter { font-size: 0.7rem; color: var(--muted); font-weight: 700; }
+.cal-day p {
+  margin: 0 0 6px; font-size: 0.72rem; line-height: 1.25; color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cal-day.today { outline: 2px solid var(--gold); }
+.cal-day.open { outline: 2px solid var(--sage); background: #eef6ef; }
+.cal-detail { margin-top: 18px; }
+.cal-detail-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.cal-meal { width: 100%; }
+.shop-progress { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.shop-progress .bar { flex: 1; min-width: 140px; height: 8px; background: var(--sand); border-radius: 99px; overflow: hidden; }
+.shop-progress .bar i { display: block; height: 100%; background: var(--sage); }
+.shop-progress p { margin: 0; color: var(--muted); }
+.shop-list { list-style: none; padding: 0; margin: 0; }
+.shop-list li { border-bottom: 1px solid var(--line); }
+.shop-list label {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 0; cursor: pointer; font-weight: 500;
+}
+.shop-list input { width: auto; margin-top: 3px; }
+.shop-list span { display: flex; justify-content: space-between; gap: 12px; width: 100%; }
+.shop-list em { font-style: normal; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.shop-list .got strong { text-decoration: line-through; color: var(--muted); }
+.batch-card { background: #eef6ef; }
+.more-nav { margin-bottom: 8px; }
+
 @media (prefers-reduced-motion: no-preference) {
-  .card, .recipe-card { transition: transform 0.2s ease; }
-  .recipe-card:hover { transform: translateY(-3px); }
+  .card, .recipe-card, .program-card { transition: transform 0.2s ease; }
+  .recipe-card:hover, .program-card:hover { transform: translateY(-3px); }
 }

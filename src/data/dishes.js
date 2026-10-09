@@ -12,7 +12,7 @@ export const dishes = [
   },
   {
     id: "pinchitos-pavo",
-    title: "Pinchitos de pavo con ensalada de verano",
+    title: "Pinchitos de pavo con ensalada de verdes",
     chapter: "Platos",
     minutes: 20,
     meal: "lunch",
