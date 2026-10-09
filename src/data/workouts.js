@@ -1,0 +1,163 @@
+export const exercises = {
+  gato: {
+    id: "gato",
+    name: "Gato-vaca",
+    pose: "catcow",
+    seconds: 40,
+    cue: "A cuatro patas. Inhala arqueando la espalda; exhala redondeando. Lento.",
+  },
+  circulos: {
+    id: "circulos",
+    name: "Círculos de hombros",
+    pose: "shoulders",
+    seconds: 30,
+    cue: "Brazos sueltos. 10 círculos adelante y 10 atrás, sin encoger el cuello.",
+  },
+  sentadilla: {
+    id: "sentadilla",
+    name: "Sentadilla al aire",
+    pose: "squat",
+    seconds: 40,
+    cue: "Pies al ancho de cadera, pecho alto. Baja como si te sentaras. 8–12 repeticiones.",
+  },
+  puente: {
+    id: "puente",
+    name: "Puente de glúteos",
+    pose: "bridge",
+    seconds: 40,
+    cue: "Boca arriba, pies cerca. Empuja el suelo y sube la cadera. Baja con control.",
+  },
+  pared: {
+    id: "pared",
+    name: "Flexiones en pared",
+    pose: "wallpush",
+    seconds: 40,
+    cue: "Manos en la pared, cuerpo recto. Acércate y empuja. 8–10 repeticiones.",
+  },
+  pajaro: {
+    id: "pajaro",
+    name: "Pájaro-perro",
+    pose: "birddog",
+    seconds: 40,
+    cue: "Brazo y pierna contrarios. Ombligo adentro. Alterna 6 veces por lado.",
+  },
+  plancha: {
+    id: "plancha",
+    name: "Plancha de rodillas",
+    pose: "plank",
+    seconds: 30,
+    cue: "Antebrazos y rodillas. Línea de hombros a cadera. Respira.",
+  },
+  gemelos: {
+    id: "gemelos",
+    name: "Elevaciones de gemelo",
+    pose: "calf",
+    seconds: 30,
+    cue: "Sube a la punta de los pies y baja lento. Apóyate en una silla si hace falta.",
+  },
+  marcha: {
+    id: "marcha",
+    name: "Marcha en casa",
+    pose: "walk",
+    seconds: 60,
+    cue: "Rodillas a la altura de la cadera, brazos sueltos. Como un paseo pequeño.",
+  },
+  cadera: {
+    id: "cadera",
+    name: "Apertura de cadera",
+    pose: "hip",
+    seconds: 40,
+    cue: "De pie, rodilla a 90°. Abre hacia fuera y vuelve. 8 por lado.",
+  },
+  gatoPie: {
+    id: "gatoPie",
+    name: "Estiramiento de gato de pie",
+    pose: "fold",
+    seconds: 40,
+    cue: "Rodillas blandas, deja caer el torso. Cabeza pesada. Sube vértebra a vértebra.",
+  },
+  respiracion: {
+    id: "respiracion",
+    name: "Respiración 4-6",
+    pose: "breath",
+    seconds: 60,
+    cue: "Inhala 4, exhala 6. Hombros lejos de las orejas. Cierra un poco los ojos.",
+  },
+  deadbug: {
+    id: "deadbug",
+    name: "Bicho muerto",
+    pose: "deadbug",
+    seconds: 40,
+    cue: "Boca arriba, lumbar pegada. Baja brazo y pierna contrarios sin archivar la espalda.",
+  },
+  step: {
+    id: "step",
+    name: "Step al escalón",
+    pose: "step",
+    seconds: 40,
+    cue: "Sube y baja de un escalón o un libro grueso. Alterna la pierna de ataque.",
+  },
+  gluteSide: {
+    id: "gluteSide",
+    name: "Abducción de cadera",
+    pose: "sideleg",
+    seconds: 40,
+    cue: "De lado, pierna de arriba recta. Sube un palmo y baja. 10 por lado.",
+  },
+};
+
+export const routines = [
+  {
+    id: "movilidad",
+    title: "Despertar suave",
+    minutes: 8,
+    vibe: "Para días de adaptación o si duermes regular.",
+    moves: ["circulos", "gato", "cadera", "marcha", "respiracion"],
+  },
+  {
+    id: "piernas",
+    title: "Piernas y glúteo",
+    minutes: 9,
+    vibe: "Fuerza corta. Nada de agotarte.",
+    moves: ["sentadilla", "puente", "gemelos", "gluteSide", "respiracion"],
+  },
+  {
+    id: "core",
+    title: "Centro estable",
+    minutes: 8,
+    vibe: "Core amable, sin crunchs de gimnasio.",
+    moves: ["gato", "pajaro", "deadbug", "plancha", "respiracion"],
+  },
+  {
+    id: "paseo",
+    title: "Paseo en casa",
+    minutes: 10,
+    vibe: "Si no puedes salir, esto cuenta.",
+    moves: ["circulos", "marcha", "step", "cadera", "gatoPie"],
+  },
+  {
+    id: "completo",
+    title: "Cuerpo completo",
+    minutes: 10,
+    vibe: "El circuito de entre semana.",
+    moves: ["pared", "sentadilla", "puente", "pajaro", "marcha"],
+  },
+  {
+    id: "caderas",
+    title: "Cadera y espalda",
+    minutes: 8,
+    vibe: "Para soltar el día sentada.",
+    moves: ["gato", "cadera", "gluteSide", "gatoPie", "respiracion"],
+  },
+  {
+    id: "cierre",
+    title: "Cierre y respirar",
+    minutes: 8,
+    vibe: "Domingo, ayuno largo o día cansado.",
+    moves: ["circulos", "gato", "puente", "gatoPie", "respiracion"],
+  },
+];
+
+export function getRoutineForDay(dayNumber) {
+  return routines[(dayNumber - 1) % routines.length];
+}
