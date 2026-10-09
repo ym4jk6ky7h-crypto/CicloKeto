@@ -1,7 +1,7 @@
 {
-  "name": "Ciclo — 6 semanas keto",
-  "short_name": "Ciclo",
-  "description": "Ciclo keto de 6 semanas: menús, recetas, alimentos y movimiento.",
+  "name": "Ciclo Keto",
+  "short_name": "Ciclo Keto",
+  "description": "Menús keto de 6 semanas, recetas paso a paso y lista de la compra. También un reset de 7 días.",
   "start_url": "./",
   "scope": "./",
   "id": "./",

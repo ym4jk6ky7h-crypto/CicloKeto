@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { APP_NAME } from "./brand.js";
 
 function isIosDevice() {
   const ua = navigator.userAgent || "";
@@ -58,7 +59,7 @@ export function InstallHint() {
     return (
       <aside className="install-sheet">
         <p className="eyebrow">iPhone</p>
-        <h2>Deja Ciclo en tu pantalla de inicio</h2>
+        <h2>Deja {APP_NAME} en tu pantalla de inicio</h2>
         {inApp ? (
           <p>WhatsApp no puede instalar apps. Ábrela en Safari y en 3 toques queda el icono.</p>
         ) : (
@@ -100,7 +101,7 @@ export function InstallHint() {
 
   return (
     <aside className="install">
-      <p>Instálala en el móvil: se abre como app, sin tienda.</p>
+      <p>Instala {APP_NAME} en el móvil: se abre como app, sin tienda.</p>
       <div>
         {promptEvent && (
           <button

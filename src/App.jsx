@@ -22,8 +22,6 @@ import {
 import { RESET_OPTIONS } from "./data/menus";
 import { exercises, getRoutineForDay } from "./data/workouts";
 import {
-  cycleStory,
-  resetStory,
   fastingLevels,
   fastingBreaks,
   sundayFasts,
@@ -36,6 +34,7 @@ import { Pose } from "./Pose.jsx";
 import { FoodArt } from "./FoodArt.jsx";
 import { WeekBoard, ShopList } from "./Kitchen.jsx";
 import { InstallHint } from "./pwa.jsx";
+import { APP_NAME, APP_TAGLINE, APP_BLURB } from "./brand.js";
 
 const TABS = [
   { id: "hoy", label: "Hoy", icon: "☀️" },
@@ -123,10 +122,10 @@ export default function App() {
     <div className="app">
       <aside className="side">
         <div className="brand">
-          <span className="logo">C</span>
+          <span className="logo">CK</span>
           <div>
-            <strong>Ciclo</strong>
-            <small>{program === "reset" ? "Reset de 7 días" : "6 semanas keto"}</small>
+            <strong>{APP_NAME}</strong>
+            <small>{program === "reset" ? "Tu reset de 7 días" : "6 semanas de menús keto"}</small>
           </div>
         </div>
         <nav className="side-nav">
@@ -320,25 +319,37 @@ function Onboarding({ onStart }) {
   const [hydrates, setHydrates] = useState(true);
   const [program, setProgram] = useState("ciclo");
   const [resetId, setResetId] = useState("reset1");
-  const story = program === "reset" ? resetStory : cycleStory;
 
   return (
-    <section className="onboard">
-      <p className="eyebrow">Elige cómo quieres empezar</p>
-      <h1>Comer bien, sin convertirlo en un examen.</h1>
-      <p className="lead">
-        Un ciclo de seis semanas para cambiar el combustible. O un reset de siete días, si ahora mismo solo necesitas aterrizar.
-      </p>
+    <section className="onboard splash">
+      <div className="splash-hero">
+        <div className="splash-arts" aria-hidden="true">
+          <div className="float a"><FoodArt kind="eggs" title="" /></div>
+          <div className="float b"><FoodArt kind="salad" title="" /></div>
+          <div className="float c"><FoodArt kind="fish" title="" /></div>
+        </div>
+        <p className="eyebrow">La app de keto en casa</p>
+        <h1 className="app-title">{APP_NAME}</h1>
+        <p className="lead">{APP_BLURB}</p>
+        <p className="tagline">{APP_TAGLINE}</p>
+      </div>
+      <div className="fun-pills">
+        <span>🍳 Recetas como si te las dictaran</span>
+        <span>🗓️ El menú de toda la semana</span>
+        <span>🛒 La compra, pasillo a pasillo</span>
+      </div>
       <div className="program-pick">
-        <button className={`card program-card ${program === "ciclo" ? "on" : ""}`} onClick={() => setProgram("ciclo")}>
+        <button className={`card program-card visual ${program === "ciclo" ? "on" : ""}`} onClick={() => setProgram("ciclo")}>
+          <FoodArt kind="bowl" title="" />
           <p className="eyebrow">6 semanas</p>
-          <h3>El ciclo</h3>
-          <p>Aterrizas, entras en cetosis y vuelves al día a día. Menús distintos cada tanda, para no repetir plato.</p>
+          <h3>El ciclo keto</h3>
+          <p>Aterrizas, entras en cetosis y vuelves al día a día. Menús distintos cada tanda.</p>
         </button>
-        <button className={`card program-card ${program === "reset" ? "on" : ""}`} onClick={() => setProgram("reset")}>
+        <button className={`card program-card visual ${program === "reset" ? "on" : ""}`} onClick={() => setProgram("reset")}>
+          <FoodArt kind="meat" title="" />
           <p className="eyebrow">7 días</p>
-          <h3>Un reset</h3>
-          <p>Una semana intensa y concreta. Cocinas el domingo y el resto es montar. Cabe en la vida real.</p>
+          <h3>Un reset keto</h3>
+          <p>Una semana concreta. Cocinas el domingo y el resto es montar platos.</p>
         </button>
       </div>
       {program === "reset" && (
@@ -356,17 +367,10 @@ function Onboarding({ onStart }) {
           ))}
         </div>
       )}
-      <div className="story-grid">
-        {story.map((s) => (
-          <article key={s.title} className="card">
-            <h3>{s.title}</h3>
-            <p>{s.body}</p>
-          </article>
-        ))}
-      </div>
-      <div className="card start-card">
+      <div className="card start-card go-card">
+        <p className="eyebrow">Empieza {APP_NAME} hoy</p>
         <label>
-          Empiezo el
+          El primer día
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <label>
@@ -376,11 +380,11 @@ function Onboarding({ onStart }) {
         {(program === "ciclo" || resetId === "reset1") && (
           <label className="check-row">
             <input type="checkbox" checked={hydrates} onChange={(e) => setHydrates(e.target.checked)} />
-            Si es la primera vez, muéstrame un carbo pequeño al mediodía
+            Primera vez: un carbo pequeño al mediodía
           </label>
         )}
-        <button className="btn primary" onClick={() => onStart(date, kg, hydrates, program, resetId)}>
-          {program === "reset" ? "Empezar el reset" : "Empezar el ciclo"}
+        <button className="btn primary go" onClick={() => onStart(date, kg, hydrates, program, resetId)}>
+          {program === "reset" ? "Arrancar mi reset keto" : "Arrancar mi Ciclo Keto"}
         </button>
         <p className="hint">Se queda en este teléfono. Nadie más lo ve.</p>
       </div>
@@ -395,6 +399,7 @@ function Today({ dayNumber, totalDays, inCycle, program, phase, meta, meals, wee
   return (
     <section className="today">
       <header className="hero">
+        <p className="brand-kicker">{APP_NAME}</p>
         <p className="eyebrow">{greeting()}</p>
         {ended ? (
           <h1>{program === "reset" ? "Reset hecho. Mira cómo te sientes." : "Ciclo cerrado. Ahora, a vivir con lo que has aprendido."}</h1>
@@ -535,7 +540,7 @@ function Recipes({ phaseId, onOpen }) {
     <section className="catalog">
       <header className="page-head">
             <h1>La cocina</h1>
-        <p>Toca un plato y te cuento por qué está, qué lleva y cómo se hace. Sin ficha de laboratorio.</p>
+        <p>Toca un plato: te digo qué sartén, qué haces primero y cómo sabes que está listo. Aunque no sepas cocinar.</p>
       </header>
       <input
         className="search"
@@ -598,7 +603,7 @@ function RecipeModal({ recipe, phaseId, onClose }) {
         <Cover item={item} className="hero" />
         <div className="modal-body">
           <p className="eyebrow">
-            {item.chapter} · {item.proteinLabel} · {item.minutes} min
+            {item.chapter} · {item.proteinLabel} · {item.minutes} min · 1 ración
           </p>
           <h2>{item.title}</h2>
           {!okNow && (
@@ -609,23 +614,41 @@ function RecipeModal({ recipe, phaseId, onClose }) {
             <p>{item.why}</p>
           </section>
           {item.note && <p className="note">{item.note}</p>}
-          <h3>Qué necesitas</h3>
+          {item.tools?.length ? (
+            <p className="tools-line">
+              En la cocina: {item.tools.join(" · ")}
+            </p>
+          ) : null}
+          <h3>Qué compras</h3>
           <ul className="ing-list">
             {(item.ingredients || []).map((i) => (
               <li key={i}>{i}</li>
             ))}
           </ul>
-          <h3>Cómo se hace</h3>
+          <h3>Cómo se hace, sin prisa</h3>
           <ol className="step-list">
             {(item.steps || []).map((s, idx) => (
-              <li key={s}>
+              <li key={`${idx}-${s.slice(0, 24)}`}>
                 <span>{idx + 1}</span>
                 {s}
               </li>
             ))}
           </ol>
+          {item.ready && (
+            <section className="ready-box">
+              <h3>Está listo cuando…</h3>
+              <p>{item.ready}</p>
+            </section>
+          )}
+          {item.rescue && (
+            <section className="rescue-box">
+              <h3>Si se tuerce</h3>
+              <p>{item.rescue}</p>
+            </section>
+          )}
+          {item.tip && <p className="note">{item.tip}</p>}
           <button className="btn primary" onClick={onClose}>
-            Listo
+            ¡Hecho!
           </button>
         </div>
       </article>

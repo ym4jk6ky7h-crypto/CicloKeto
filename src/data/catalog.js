@@ -1,4 +1,5 @@
 import { recipes } from "./recipes";
+import { HOW } from "./howto";
 
 export const MEAL_FILTERS = [
   { id: "all", label: "Todas" },
@@ -207,6 +208,8 @@ export function enrich(recipe) {
   const meal = inferMeal(recipe);
   const protein = recipe.protein || inferProtein(recipe);
   const art = inferArt(recipe, protein);
+  const how = HOW[recipe.id];
+  const steps = how?.steps || recipe.steps || [];
   return {
     ...recipe,
     meal,
@@ -218,8 +221,12 @@ export function enrich(recipe) {
     why: recipe.why || WHY[recipe.id] || "Plato del método: proteína, verdura y grasa buena. Si un ingrediente falta, usa el equivalente de la guía.",
     tip: recipe.tip || TIPS[recipe.id] || "",
     servings: recipe.servings || "1 ración",
+    steps,
+    tools: how?.tools || recipe.tools || [],
+    ready: how?.ready || recipe.ready || "",
+    rescue: how?.rescue || recipe.rescue || "",
     searchBlob: blob(
-      [recipe.title, recipe.chapter, meal, protein, proteinLabel(protein), MEAL_LABELS[meal], ...(recipe.ingredients || []), ...(recipe.steps || []), WHY[recipe.id] || "", TIPS[recipe.id] || ""].join(" ")
+      [recipe.title, recipe.chapter, meal, protein, proteinLabel(protein), MEAL_LABELS[meal], ...(recipe.ingredients || []), ...steps, WHY[recipe.id] || "", TIPS[recipe.id] || ""].join(" ")
     ),
   };
 }

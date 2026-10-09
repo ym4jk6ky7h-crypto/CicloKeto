@@ -1,6 +1,6 @@
-# Ciclo — 6 semanas keto
+# Ciclo Keto
 
-App web sencilla para seguir un ciclo de 6 semanas: adaptación, cetosis y reinserción, con recetas, semáforo de alimentos y rutinas cortas de movimiento.
+App de menús keto de 6 semanas (o un reset de 7 días): recetas paso a paso, calendario semanal y lista de la compra.
 
 ## Cómo abrirla
 

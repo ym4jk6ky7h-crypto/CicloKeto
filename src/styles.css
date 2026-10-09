@@ -49,10 +49,11 @@ img { max-width: 100%; display: block; }
 }
 .brand { display: flex; gap: 12px; align-items: center; }
 .logo {
-  width: 42px; height: 42px; border-radius: 14px;
+  width: 44px; height: 44px; border-radius: 14px;
   background: var(--sage); color: #fff9f1;
   display: grid; place-items: center;
-  font-family: Fraunces, serif; font-weight: 700; font-size: 1.3rem;
+  font-family: Fraunces, serif; font-weight: 700; font-size: 0.92rem;
+  letter-spacing: -0.04em;
 }
 .brand small { display: block; color: var(--muted); }
 .side-nav { display: grid; gap: 6px; }
@@ -334,6 +335,46 @@ ul, ol { padding-left: 1.1em; }
 .shop-list .got strong { text-decoration: line-through; color: var(--muted); }
 .batch-card { background: #eef6ef; }
 .more-nav { margin-bottom: 8px; }
+.app-title { font-size: clamp(2.4rem, 8vw, 3.4rem); margin: 0.1em 0 0.25em; }
+.brand-kicker {
+  font-family: Fraunces, Georgia, serif; font-size: 1.05rem; font-weight: 700;
+  color: var(--sage); margin: 0 0 4px;
+}
+.tagline { font-weight: 650; color: var(--sage); }
+.splash-hero { position: relative; padding-top: 8px; margin-bottom: 8px; }
+.splash-arts { position: relative; height: 132px; margin: 0 0 8px; }
+.splash-arts .float {
+  position: absolute; width: 120px; height: 84px; border-radius: 22px;
+  overflow: hidden; box-shadow: var(--shadow); background: #fff;
+}
+.splash-arts .a { left: 0; top: 18px; transform: rotate(-8deg); }
+.splash-arts .b { left: 50%; top: 0; transform: translateX(-50%) rotate(4deg); z-index: 2; }
+.splash-arts .c { right: 0; top: 22px; transform: rotate(9deg); }
+.fun-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 18px; }
+.fun-pills span {
+  background: #fff; border-radius: 999px; padding: 8px 12px;
+  font-size: 0.85rem; font-weight: 650; box-shadow: var(--shadow);
+}
+.program-card.visual { padding: 0 0 16px; overflow: hidden; }
+.program-card.visual .food-art { height: 92px; width: 100%; }
+.program-card.visual .eyebrow, .program-card.visual h3, .program-card.visual p { padding: 0 14px; }
+.program-card.visual .eyebrow { margin-top: 10px; }
+.go-card { max-width: none; margin-top: 8px; background: linear-gradient(180deg, #fff9f1, #eef6ef); }
+.btn.go { width: 100%; padding: 16px 18px; font-size: 1.05rem; }
+.tools-line { background: #fff6e8; padding: 10px 12px; border-radius: 12px; font-weight: 650; }
+.ready-box, .rescue-box { padding: 14px; border-radius: 16px; margin: 12px 0; }
+.ready-box { background: #eef6ef; }
+.rescue-box { background: #fff6e8; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .splash-arts .float .food-art { animation: bob 4.5s ease-in-out infinite; }
+  .splash-arts .b .food-art { animation-delay: 0.4s; }
+  .splash-arts .c .food-art { animation-delay: 0.9s; }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .card, .recipe-card, .program-card { transition: transform 0.2s ease; }
