@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Menú Keto">
+  <rect width="512" height="512" fill="#146B45"/>
+  <path fill="#F4F3EA" d="M256 78c-78 0-162 106-162 226 0 92 72 156 162 156s162-64 162-156C418 184 334 78 256 78z"/>
+  <path fill="#6B9A78" d="M256 118c-58 0-122 88-122 182 0 74 54 124 122 124s122-50 122-124C378 206 314 118 256 118z"/>
+  <circle cx="256" cy="298" r="58" fill="#D4A84A"/>
+</svg>
